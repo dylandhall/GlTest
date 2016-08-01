@@ -1,0 +1,24 @@
+{
+  "name": "gltest",
+  "version": "1.0.0",
+  "description": "test project for webgl libraries",
+  "main": "index.html",
+  "dependencies": {
+    "babylonjs": "^2.4.0",
+    "cannon": "^0.6.2"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-nodeunit": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dylan Hall",
+  "license": "ISC"
+}
