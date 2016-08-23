@@ -1,4 +1,5 @@
 ﻿/// <reference path="../node_modules/babylonjs/babylon.d.ts" />
+/// <reference path="../babylon.js-master/materialslibrary/dist/dts/babylon.watermaterial.d.ts" />
 "use strict";
 class ActiveSphere {
     fireSphere: any;
@@ -36,9 +37,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
         
-        // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
-        var ground = BABYLON.Mesh.CreateGround("ground1", 20, 20, 2, scene);
-        ground.renderingGroupId = 1;
+//        // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
+//        var ground = BABYLON.Mesh.CreateGround("ground1", 512, 512, 2, scene);
+//        // Ground
+//        var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+//        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/ground.jpg", scene);
+//        //ground.renderingGroupId = 1;
+//        ground.position.y = -1;
+//        ground.material = groundMaterial;
+
 
         //ground.material = new BABYLON.Material("material1",scene).
         var gravityVector = scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
@@ -47,11 +54,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
         scene.enablePhysics(gravityVector, physicsPlugin);
 
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9, friction: 0.05 }, scene);
+        //ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9, friction: 0.05 }, scene);
 
         var torus = BABYLON.MeshBuilder.CreateTorus("torus", {diameter: 6, thickness: 1, tessellation: 16}, scene);
         torus.position = netLocation;
-        torus.renderingGroupId = 1;
+        //torus.renderingGroupId = 1;
         //box.rotation.y=90;
 
         torus.physicsImpostor = new BABYLON.PhysicsImpostor(torus, BABYLON.PhysicsImpostor.MeshImpostor, {
@@ -66,7 +73,7 @@ window.addEventListener("DOMContentLoaded", () => {
         var party = () => {
             for (var i = 0; i < 20; i++) {
                 var sphere = BABYLON.Mesh.CreateSphere('sphere' + i, 16, 2, scene);
-                sphere.renderingGroupId = 1;
+                //sphere.renderingGroupId = 1;
                 sphere.position.z = 80;
                 // move the sphere upward 1/2 of its height
                 sphere.position.y = (1 + i) * 6.2;
@@ -85,7 +92,7 @@ window.addEventListener("DOMContentLoaded", () => {
         // Sphere5 material
         var material = new BABYLON.StandardMaterial("kosh5", scene);
         material.diffuseColor = new BABYLON.Color3(0, 0, 0);
-        material.reflectionTexture = new BABYLON.CubeTexture("skybox/TropicalSunnyDay", scene);
+        material.reflectionTexture = new BABYLON.CubeTexture("assets/skybox/TropicalSunnyDay", scene);
         material.reflectionTexture.level = 0.5;
         material.specularPower = 64;
         material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2); 
@@ -146,7 +153,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 var fireSphere = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 2, scene);
                 fireSphere.material = material;
-                fireSphere.renderingGroupId = 1;
+                //fireSphere.renderingGroupId = 1;
                 fireSphere.position.y = 2;
                 fireSphere.physicsImpostor = new BABYLON.PhysicsImpostor(fireSphere, BABYLON.PhysicsImpostor.SphereImpostor, spherePhysicsOptions, scene);
                 fireSphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, opp, adj));
@@ -156,7 +163,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
 
         // Skybox
-        var skybox = BABYLON.Mesh.CreateBox("skyBox", 10.0, scene);
+        var skybox = BABYLON.Mesh.CreateBox("skyBox", 512.0, scene);
         skybox.infiniteDistance = true;
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
         skyboxMaterial.backFaceCulling = false;
@@ -166,19 +173,59 @@ window.addEventListener("DOMContentLoaded", () => {
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
         skybox.material = skyboxMaterial;
 
-        skybox.renderingGroupId = 0;
+        //skybox.renderingGroupId = 0;
+
+
+        // Water		
+        var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, scene, false);
+        var water = new BABYLON.WaterMaterial("water", scene);
+        water.backFaceCulling = false;
+        water.bumpTexture = new BABYLON.Texture("assets/waterbump.png", scene);
+        water.windForce = -10;
+        water.waveHeight = 0.2;
+        water.addToRenderList(skybox);
+        //water.addToRenderList(ground);
+        waterMesh.material = water;
+
+
+        var loader = new BABYLON.AssetsManager(scene);
+        var sub = loader.addMeshTask("submarine", "", "/assets/", "Shuka-B.obj");
+
+        var success = (t: BABYLON.MeshAssetTask) => {
+            t.loadedMeshes.forEach(m => {
+                m.scaling.x += 20;
+                m.scaling.y += 20;
+                m.scaling.z += 20;
+                m.position.x += 0;
+                m.position.y -= 5;
+                m.position.z += 30;
+                m.rotation.y += 5;
+                //m.renderingGroupId = 1;
+                water.addToRenderList(m);
+                m.material = material;
+            });
+        };
+        sub.onSuccess = success;
+
+
+        //The next three javascript lines are very important, as they register a render loop to repeatedly render the scene on the canvas:
+        loader.onFinish = function () {
+            engine.runRenderLoop(() => {
+                scene.render();
+            });
+        };
+
+        loader.load();
+
 
         // return the created scene
         return scene;
+        
     }
 
 
     var scene = createScene();
 
-    //The next three javascript lines are very important, as they register a render loop to repeatedly render the scene on the canvas:
-    engine.runRenderLoop(() => {
-        scene.render();
-    });
 
     window.addEventListener("resize", () => {
     });

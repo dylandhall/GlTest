@@ -18,7 +18,9 @@ module.exports = function(grunt) {
       dist: {
           src: [
               "node_modules/babylonjs/babylon.js",
+              "node_modules/babylonjs/babylon.objFileLoader.js",
               "node_modules/cannon/build/cannon.js",
+              "Babylon.js-master/materialsLibrary/dist/babylon.waterMaterial.min.js",
               "app/scene.js"],
         dest: "dist/<%= pkg.name %>.js"
       }
