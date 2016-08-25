@@ -1,5 +1,7 @@
-﻿/// <reference path="../node_modules/babylonjs/babylon.d.ts" />
-/// <reference path="../babylon.js-master/materialslibrary/dist/dts/babylon.watermaterial.d.ts" />
+﻿
+/// <reference path="../Babylon.js-master/dist/babylon.2.4.d.ts" />
+/// <reference path="../Babylon.js-master/materialslibrary/dist/dts/babylon.watermaterial.d.ts" />
+
 "use strict";
 class ActiveSphere {
     fireSphere: any;
@@ -8,10 +10,14 @@ class ActiveSphere {
 }
 
 var fire = false, moveCamera = false;
-var spherePhysicsOptions = { mass: 1, restitution: 0.9, friction: 0.05 };
+var spherePhysicsOptions = { mass: 0, restitution: 0.9, friction: 0.0 };
 
+var toRadians = angle => angle * (Math.PI / 180);
 var netLocation = new BABYLON.Vector3(0, 15, 70);
-var camLocations = [new BABYLON.Vector3(0, 200, 0), new BABYLON.Vector3(30, 30, -40)];
+var subOffset = new BABYLON.Vector3(40, -5, 200);
+var camLocations = [new BABYLON.Vector3(0, 400, 0), new BABYLON.Vector3(0, 30, -40)];
+var camViews = [new BABYLON.Vector3(0, 0, 40), subOffset];
+
 var camLocation = 1;
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -27,7 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
         var camera = new BABYLON.FreeCamera("camera1",camLocations[camLocation], scene);
 
         // target the camera to scene origin
-        camera.lockedTarget = new BABYLON.Vector3(0, 0, 40);
+        camera.lockedTarget = subOffset;
 
         // attach the camera to the canvas
         camera.attachControl(canvas, false);
@@ -37,14 +43,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
         
-//        // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
-//        var ground = BABYLON.Mesh.CreateGround("ground1", 512, 512, 2, scene);
-//        // Ground
-//        var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-//        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/ground.jpg", scene);
-//        //ground.renderingGroupId = 1;
-//        ground.position.y = -1;
-//        ground.material = groundMaterial;
+        // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
+        var ground = BABYLON.Mesh.CreateGround("ground1", 512, 512, 2, scene);
+        // Ground
+        var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/ground.jpg", scene);
+        //ground.renderingGroupId = 1;
+        ground.position.y = -1;
+        ground.material = groundMaterial;
 
 
         //ground.material = new BABYLON.Material("material1",scene).
@@ -56,16 +62,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
         //ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9, friction: 0.05 }, scene);
 
-        var torus = BABYLON.MeshBuilder.CreateTorus("torus", {diameter: 6, thickness: 1, tessellation: 16}, scene);
-        torus.position = netLocation;
-        //torus.renderingGroupId = 1;
-        //box.rotation.y=90;
-
-        torus.physicsImpostor = new BABYLON.PhysicsImpostor(torus, BABYLON.PhysicsImpostor.MeshImpostor, {
-            friction: 0.05,
-            restitution: 0.9,
-            mass: 0
-        }, scene);
+//        var torus = BABYLON.MeshBuilder.CreateTorus("torus", {diameter: 6, thickness: 1, tessellation: 16}, scene);
+//        torus.position = netLocation;
+//        //torus.renderingGroupId = 1;
+//        //box.rotation.y=90;
+//
+//        torus.physicsImpostor = new BABYLON.PhysicsImpostor(torus, BABYLON.PhysicsImpostor.MeshImpostor, {
+//            friction: 0.05,
+//            restitution: 0.9,
+//            mass: 0
+//        }, scene);
 
 
 
@@ -103,67 +109,10 @@ window.addEventListener("DOMContentLoaded", () => {
         material.emissiveFresnelParameters.power = 2;
         material.emissiveFresnelParameters.leftColor = BABYLON.Color3.Black();
         material.emissiveFresnelParameters.rightColor = BABYLON.Color3.White();
-
-        var fireSpheres: ActiveSphere[] = [];
-        
-
-        /*
-         * before render, actions occur here
-         */
-
-        scene.registerBeforeRender(() => {
-
-            if (moveCamera) {
-                moveCamera = false;
-                var position = new BABYLON.Animation("camPos", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                camLocation = camLocation === 0 ? 1 : 0;
-                var keys = [{ frame: 0, value: camera.position }, { frame: 50, value: camLocations[camLocation] }];
-                position.setKeys(keys);
-                camera.animations.push(position);
-                scene.beginAnimation(camera, 0, 50, false, 1);
-            }
-
-            //looks at our existing fire spheres and check if they've gone through the hoop
-            if (fireSpheres.length > 0) {
-                for (var i = 0; i < fireSpheres.length; i++) {
-                    if (!fireSpheres[i].scored) {
-                        if (Math.pow(fireSpheres[i].fireSphere.position.x - netLocation.x,2) < 1 && 
-                            Math.pow(fireSpheres[i].fireSphere.position.y - netLocation.y,2) < 1 && 
-                            Math.pow(fireSpheres[i].fireSphere.position.z - netLocation.z,2) < 1) {
-                            fireSpheres[i].scored = true;
-                            party();
-                        }
-                    }
-                }
-            }
-
-
-            //if we've hit the fire button, fire the ball!
-            if (fire) {
-                var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
-                var force = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
-
-                if (isNaN(angle) || angle > 90 || angle < 0 || isNaN(force) || force > 100 || force < 1) {
-                    fire = false;
-                    return;
-                }
-
-                var adj = Math.cos(toRadians(angle)) * force;
-                var opp = Math.sin(toRadians(angle)) * force;
-
-                var fireSphere = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 2, scene);
-                fireSphere.material = material;
-                //fireSphere.renderingGroupId = 1;
-                fireSphere.position.y = 2;
-                fireSphere.physicsImpostor = new BABYLON.PhysicsImpostor(fireSphere, BABYLON.PhysicsImpostor.SphereImpostor, spherePhysicsOptions, scene);
-                fireSphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, opp, adj));
-                fireSpheres.push({ fireSphere: fireSphere, scored: false, launchTime:new Date().getMilliseconds() });
-                fire = false;
-            }
-        });
+        // end scene loop function
 
         // Skybox
-        var skybox = BABYLON.Mesh.CreateBox("skyBox", 512.0, scene);
+        var skybox = BABYLON.Mesh.CreateBox("skyBox", 1024.0, scene);
         skybox.infiniteDistance = true;
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
         skyboxMaterial.backFaceCulling = false;
@@ -175,7 +124,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
         //skybox.renderingGroupId = 0;
 
-
         // Water		
         var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, scene, false);
         var water = new BABYLON.WaterMaterial("water", scene);
@@ -184,28 +132,119 @@ window.addEventListener("DOMContentLoaded", () => {
         water.windForce = -10;
         water.waveHeight = 0.2;
         water.addToRenderList(skybox);
-        //water.addToRenderList(ground);
-        waterMesh.material = water;
+        water.addToRenderList(ground);
 
+        waterMesh.material = water;
+        //var fireSpheres: ActiveSphere[] = [];
 
         var loader = new BABYLON.AssetsManager(scene);
         var sub = loader.addMeshTask("submarine", "", "/assets/", "Shuka-B.obj");
 
         var success = (t: BABYLON.MeshAssetTask) => {
-            t.loadedMeshes.forEach(m => {
+
+
+
+
+            for (var i = 0; i < t.loadedMeshes.length; i++) {
+                var m = t.loadedMeshes[i];
                 m.scaling.x += 20;
                 m.scaling.y += 20;
                 m.scaling.z += 20;
-                m.position.x += 0;
-                m.position.y -= 5;
-                m.position.z += 30;
+                m.position = subOffset;
                 m.rotation.y += 5;
                 //m.renderingGroupId = 1;
-                water.addToRenderList(m);
+                //water.addToRenderList(m);
                 m.material = material;
-            });
+            }
+
         };
         sub.onSuccess = success;
+
+        /*
+         * before render, actions occur here
+         */
+
+        scene.registerBeforeRender(() => {
+
+            if (moveCamera) {
+                moveCamera = false;
+                var position = new BABYLON.Animation("camPos", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                var lockedTarget = new BABYLON.Animation("camView", "lockedTarget", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                camLocation = camLocation === 0 ? 1 : 0;
+                var keys1 = [{ frame: 0, value: camera.position }, { frame: 50, value: camLocations[camLocation] }];
+                var keys2 = [{ frame: 0, value: camera.lockedTarget }, { frame: 50, value: camViews[camLocation] }];
+                position.setKeys(keys1);
+                lockedTarget.setKeys(keys2);
+                camera.animations.push(position);
+                camera.animations.push(lockedTarget);
+                scene.beginAnimation(camera, 0, 50, false, 1);
+            }
+
+            if (fire) {
+                fire = false;
+                var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
+                var force = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
+
+                if (isNaN(angle) || angle > 90 || angle < 0 || isNaN(force) || force > 100 || force < 1) {
+                    fire = false;
+                    return;
+                }
+                var fireSphere = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 2, scene);
+                fireSphere.material = material;
+                var adj = Math.cos(toRadians(angle)) * force;
+                var opp = Math.sin(toRadians(angle)) * force;
+//
+                //fireSphere.renderingGroupId = 1;
+                fireSphere.position.y = 5;
+
+                fireSphere.physicsImpostor = new BABYLON.PhysicsImpostor(fireSphere, BABYLON.PhysicsImpostor.SphereImpostor, spherePhysicsOptions, scene);
+                fireSphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, opp, adj));
+                //fireSpheres.push({ fireSphere: fireSphere, scored: false, launchTime:new Date().getMilliseconds() });
+                fire = false;
+            }
+
+
+            //looks at our existing fire spheres and check if they've gone through the hoop
+//            if (fireSpheres.length > 0) {
+//                for (var i = 0; i < fireSpheres.length; i++) {
+//                    if (!fireSpheres[i].scored) {
+//                        if (Math.pow(fireSpheres[i].fireSphere.position.x - netLocation.x,2) < 1 && 
+//                            Math.pow(fireSpheres[i].fireSphere.position.y - netLocation.y,2) < 1 && 
+//                            Math.pow(fireSpheres[i].fireSphere.position.z - netLocation.z,2) < 1) {
+//                            fireSpheres[i].scored = true;
+//                            party();
+//                        }
+//                    }
+//                }
+//            }
+
+
+            //if we've hit the fire button, fire the ball!
+//            if (fire) {
+//                var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
+//                var force = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
+//
+//                if (isNaN(angle) || angle > 90 || angle < 0 || isNaN(force) || force > 100 || force < 1) {
+//                    fire = false;
+//                    return;
+//                }
+//
+//                var adj = Math.cos(toRadians(angle)) * force;
+//                var opp = Math.sin(toRadians(angle)) * force;
+//
+//                var fireSphere = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 2, scene);
+//                fireSphere.material = material;
+//                //fireSphere.renderingGroupId = 1;
+//                fireSphere.position.y = 2;
+//                fireSphere.physicsImpostor = new BABYLON.PhysicsImpostor(fireSphere, BABYLON.PhysicsImpostor.SphereImpostor, spherePhysicsOptions, scene);
+//                fireSphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, opp, adj));
+//                fireSpheres.push({ fireSphere: fireSphere, scored: false, launchTime:new Date().getMilliseconds() });
+//                fire = false;
+//            }
+        });
+
+
+
 
 
         //The next three javascript lines are very important, as they register a render loop to repeatedly render the scene on the canvas:
@@ -226,7 +265,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     var scene = createScene();
 
-
+     
     window.addEventListener("resize", () => {
     });
 
@@ -238,6 +277,5 @@ window.addEventListener("DOMContentLoaded", () => {
         moveCamera = true;
     });
 
-    var toRadians = angle => angle * (Math.PI / 180);
 
 });

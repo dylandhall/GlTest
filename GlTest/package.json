@@ -4,7 +4,6 @@
   "description": "test project for webgl libraries",
   "main": "index.html",
   "dependencies": {
-    "babylonjs": "^2.4.0",
     "cannon": "^0.6.2"
   },
   "devDependencies": {

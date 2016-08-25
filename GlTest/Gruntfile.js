@@ -1,3 +1,4 @@
+
 /*global module:false*/
 module.exports = function(grunt) {
 
@@ -17,8 +18,8 @@ module.exports = function(grunt) {
       },
       dist: {
           src: [
-              "node_modules/babylonjs/babylon.js",
-              "node_modules/babylonjs/babylon.objFileLoader.js",
+              "Babylon.js-master/dist/babylon.2.4.js",
+              "Babylon.js-master/loaders/OBJ/babylon.objFileLoader.js",
               "node_modules/cannon/build/cannon.js",
               "Babylon.js-master/materialsLibrary/dist/babylon.waterMaterial.min.js",
               "app/scene.js"],
