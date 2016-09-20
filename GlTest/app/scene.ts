@@ -76,7 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
         //makes a bunch of spheres appear
-        var party = () => {
+        /*var party = () => {
             for (var i = 0; i < 20; i++) {
                 var sphere = BABYLON.Mesh.CreateSphere('sphere' + i, 16, 2, scene);
                 //sphere.renderingGroupId = 1;
@@ -93,7 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 (<BABYLON.StandardMaterial>sphere.material).diffuseColor = new BABYLON.Color3(i * ((i % 3) * 0.22), i * 0.16, i * ((i % 4) * 0.42));
 
             }
-        };
+        };*/
 
         // Sphere5 material
         var material = new BABYLON.StandardMaterial("kosh5", scene);
@@ -198,17 +198,27 @@ window.addEventListener("DOMContentLoaded", () => {
             if (fire) {
                 //fire a torpedo
                 fire = false;
+                var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
+                var distance = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
+
+                var adj = Math.cos(toRadians((360-angle)+180)) * distance;
+                var opp = Math.sin(toRadians((360-angle)+180)) * distance;
+
+                var fireTo = new BABYLON.Vector3(opp, -3, -adj);
+
+                var frames = 60 * (distance / 50);
+
                 var torpedo = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 4, scene);
                 var fireAnimation = new BABYLON.Animation("fireAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, false);
-                var fireAnimationKeys = [{ frame: 0, value: <BABYLON.Vector3>{ x: 0, y: 0, z: 0 } }, { frame: (60*5), value: subOffset }];
+                var fireAnimationKeys = [{ frame: 0, value: <BABYLON.Vector3>{ x: 0, y: 0, z: 0 } }, { frame: frames, value: fireTo }];
 
                 water.addToRenderList(torpedo);
                 fireAnimation.setKeys(fireAnimationKeys);
-                fireAnimation.addEvent(new BABYLON.AnimationEvent((60 * 5), () => { torpedo = null;party(); }, true));
+                fireAnimation.addEvent(new BABYLON.AnimationEvent(frames, () => { torpedo = null; }, true));
                 torpedo.animations.push(fireAnimation);
 
                 torpedo.position = <BABYLON.Vector3>{ x: 0, y: 0, z: 0 };
-                scene.beginAnimation(torpedo, 0, (60 * 5), false, 1);
+                scene.beginAnimation(torpedo, 0, frames, false, 1);
             }
 
             

@@ -33,6 +33,8 @@
         width: 600px;
         height: 600px;
         touch-action: none;
+        float: left;
+        margin: 10px;
     }
     p{ font-family: sans-serif;}
 </style>
@@ -40,13 +42,13 @@
 <body>
 
 <div class="renderContainer">
+    <canvas id="renderCanvas"></canvas>
     <p>Submarine is 120 meters out, and 40 meters starboard.<br/>
-    What angle do you have to fire at and how far should the torpedo go before detonating?</p>
-    <label for="angle">angle:</label> <input id="angle" type="number" value="45"/> <label for="force">force:</label> <input type="number" id="force" value="20"/>&nbsp;<button id="fire">fire</button><br/>
+        What angle do you have to fire at and how far should the torpedo go before detonating?
+    </p>
+    <label for="angle">angle:</label> <input id="angle" type="number" value="0"/> <label for="force">force:</label> <input type="number" id="force" value="200"/>&nbsp;<button id="fire">fire</button><br/>
     <button id="moveCamera">Move the camera</button>
 </div><br/>
 
-<div class="renderContainer"><canvas id="renderCanvas"></canvas>
-</div>
 </body>
 </html>
