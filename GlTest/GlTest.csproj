@@ -74,6 +74,7 @@
     <Content Include="assets\skybox\TropicalSunnyDay_px.jpg" />
     <Content Include="assets\skybox\TropicalSunnyDay_py.jpg" />
     <Content Include="assets\skybox\TropicalSunnyDay_pz.jpg" />
+    <Content Include="cards.html" />
     <Content Include="packages.config" />
     <Content Include="package.json" />
     <Content Include="assets\Shuka-B.obj" />
