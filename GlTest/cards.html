@@ -175,7 +175,7 @@ function init() {
   $('#cardSlots').html( '' );
 
   // Create the pile of shuffled cards
-  var numbers = [1024, 2048, 3072, 4086, 10000];
+  var numbers = [1024, 2048, 3072, 4096, 9999];
   // Create the card slots
   var words = ['X', 'X', 'X', 'X', 'X'];
   for (var i = 0; i < 5; i++) {
@@ -225,7 +225,7 @@ function handleCardDrop(event, ui) {
   // If all the cards have been placed correctly then display a message
   // and reset the cards for another go
 
-  if ( correctCards == 10 ) {
+  if ( correctCards == 5 ) {
     $('#successMessage').show();
     $('#successMessage').animate( {
       left: '380px',

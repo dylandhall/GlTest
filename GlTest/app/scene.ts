@@ -14,7 +14,7 @@ var spherePhysicsOptions = { mass: 0, restitution: 0.9, friction: 0.0 };
 
 var toRadians = angle => angle * (Math.PI / 180);
 var subOffset = new BABYLON.Vector3(60, -6, 200);
-var camLocations = [new BABYLON.Vector3(0, 200, -100), new BABYLON.Vector3(0, 30, -80)];
+var camLocations = [new BABYLON.Vector3(0, 200, -100), new BABYLON.Vector3(0, 15, -50)];
 var camViews = [new BABYLON.Vector3(0, 0, 100), subOffset];
 
 
@@ -134,7 +134,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 m.scaling.x += 20;
                 m.scaling.y += 20;
                 m.scaling.z += 20;
-                m.position = home;
+                m.position = new BABYLON.Vector3(home.x-5,home.y,home.z);
                 m.rotation.y = + toRadians(90);
                 //m.renderingGroupId = 1;
                 water.addToRenderList(m);
@@ -170,13 +170,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
                 var distance = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
-
-                moveCamera();
-
+                
                 var adj = Math.cos(toRadians((360-angle)+180)) * distance;
                 var opp = Math.sin(toRadians((360-angle)+180)) * distance;
 
                 var fireTo = new BABYLON.Vector3(opp, -3, -adj);
+
+                camViews[1] = fireTo;
+                moveCamera();
 
                 var hit = Math.pow(subOffset.x - fireTo.x, 2) < 4 && Math.pow(subOffset.z - fireTo.z, 2) < 4;
 
@@ -233,8 +234,8 @@ window.addEventListener("DOMContentLoaded", () => {
                             });
                         } else {
                             document.getElementById("message").innerHTML = "Close!";
+                            window.setTimeout(() => { document.getElementById("message").innerHTML = ""; }, 1000);
                         }
-                        window.setTimeout(() => { document.getElementById("message").innerHTML = ""; }, 1000);
                     });
                 });
                 
