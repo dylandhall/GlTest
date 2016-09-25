@@ -3,26 +3,30 @@
 /// <reference path="../Babylon.js-master/materialslibrary/dist/dts/babylon.watermaterial.d.ts" />
 
 "use strict";
-class ActiveSphere {
-    fireSphere: any;
-    scored: boolean;
-    launchTime: number;
-}
+//class ActiveSphere {
+//    fireSphere: any;
+//    scored: boolean;
+//    launchTime: number;
+//}
 
 var fire = false, moveCamera = false;
 var spherePhysicsOptions = { mass: 0, restitution: 0.9, friction: 0.0 };
 
 var toRadians = angle => angle * (Math.PI / 180);
-var netLocation = new BABYLON.Vector3(0, 15, 70);
-var subOffset = new BABYLON.Vector3(40, -6, 120);
-var camLocations = [new BABYLON.Vector3(0, 400, 0), new BABYLON.Vector3(0, 30, -50)];
-var camViews = [new BABYLON.Vector3(0, 0, 40), subOffset];
+var subOffset = new BABYLON.Vector3(60, -6, 200);
+var camLocations = [new BABYLON.Vector3(0, 200, -100), new BABYLON.Vector3(0, 30, -80)];
+var camViews = [new BABYLON.Vector3(0, 0, 100), subOffset];
 
-var camLocation = 1;
+
+
+var camLocation = 0;
 
 window.addEventListener("DOMContentLoaded", () => {
     var canvas = <HTMLCanvasElement>document.getElementById("renderCanvas");
     var engine = new BABYLON.Engine(canvas, true);
+
+    document.getElementById("metersOut").innerHTML = subOffset.z.toString();
+    document.getElementById("metersStarboard").innerHTML = subOffset.x.toString();
 
     engine.setSize(600, 600);
     var createScene = () => {
@@ -33,7 +37,7 @@ window.addEventListener("DOMContentLoaded", () => {
         var camera = new BABYLON.FreeCamera("camera1",camLocations[camLocation], scene);
 
         // target the camera to scene origin
-        camera.lockedTarget = subOffset;
+        camera.lockedTarget = camViews[camLocation];
 
         // attach the camera to the canvas
         camera.attachControl(canvas, false);
@@ -44,56 +48,14 @@ window.addEventListener("DOMContentLoaded", () => {
         // create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
         
         // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
-        var ground = BABYLON.Mesh.CreateGround("ground1", 512, 512, 2, scene);
+
+        var ground = BABYLON.Mesh.CreateGround("ground1", 1024, 1024, 2, scene);
         // Ground
         var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
         groundMaterial.diffuseTexture = new BABYLON.Texture("assets/ground.jpg", scene);
         //ground.renderingGroupId = 1;
-        ground.position.y = -1;
+        ground.position.y = -20;
         ground.material = groundMaterial;
-
-
-        //ground.material = new BABYLON.Material("material1",scene).
-        var gravityVector = scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
-
-        var physicsPlugin = new BABYLON.CannonJSPlugin();
-
-        scene.enablePhysics(gravityVector, physicsPlugin);
-
-        //ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9, friction: 0.05 }, scene);
-
-//        var torus = BABYLON.MeshBuilder.CreateTorus("torus", {diameter: 6, thickness: 1, tessellation: 16}, scene);
-//        torus.position = netLocation;
-//        //torus.renderingGroupId = 1;
-//        //box.rotation.y=90;
-//
-//        torus.physicsImpostor = new BABYLON.PhysicsImpostor(torus, BABYLON.PhysicsImpostor.MeshImpostor, {
-//            friction: 0.05,
-//            restitution: 0.9,
-//            mass: 0
-//        }, scene);
-
-
-
-        //makes a bunch of spheres appear
-        /*var party = () => {
-            for (var i = 0; i < 20; i++) {
-                var sphere = BABYLON.Mesh.CreateSphere('sphere' + i, 16, 2, scene);
-                //sphere.renderingGroupId = 1;
-                sphere.position.z = 80;
-                // move the sphere upward 1/2 of its height
-                sphere.position.y = (1 + i) * 6.2;
-                //sphere.position.x = ((1 + i) * 0.2)-5;
-
-                sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, spherePhysicsOptions, scene);
-
-                sphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(((i % 2) * 1.2) - 0.6, (20 - i) * 0.5, ((i % 3) * 2) - 1));
-
-                sphere.material = new BABYLON.StandardMaterial("mat" + i, scene);
-                (<BABYLON.StandardMaterial>sphere.material).diffuseColor = new BABYLON.Color3(i * ((i % 3) * 0.22), i * 0.16, i * ((i % 4) * 0.42));
-
-            }
-        };*/
 
         // Sphere5 material
         var material = new BABYLON.StandardMaterial("kosh5", scene);
@@ -103,12 +65,17 @@ window.addEventListener("DOMContentLoaded", () => {
         material.specularPower = 64;
         material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2); 
 
+
+        // Explosion material -just grey plus new one so we can fuck with the opacity
+        var explosionMaterial = new BABYLON.StandardMaterial("kosh6", scene);
+        
         // Fresnel
         material.emissiveFresnelParameters = new BABYLON.FresnelParameters();
         material.emissiveFresnelParameters.bias = 0.4;
         material.emissiveFresnelParameters.power = 2;
         material.emissiveFresnelParameters.leftColor = BABYLON.Color3.Black();
         material.emissiveFresnelParameters.rightColor = BABYLON.Color3.White();
+
         // end scene loop function
 
         // Skybox
@@ -125,7 +92,7 @@ window.addEventListener("DOMContentLoaded", () => {
         //skybox.renderingGroupId = 0;
 
         // Water		
-        var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, scene, false);
+        var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 1024, 1024, 32, scene, false);
         var water = new BABYLON.WaterMaterial("water", scene);
         water.alpha = 0.78;
         water.backFaceCulling = false;
@@ -143,10 +110,11 @@ window.addEventListener("DOMContentLoaded", () => {
         var sub = loader.addMeshTask("submarine", "", "/assets/", "Shuka-B.obj");
         var sub2 = loader.addMeshTask("submarine", "", "/assets/", "Shuka-B.obj");
         
+        var subMeshes;
         sub.onSuccess = (t: BABYLON.MeshAssetTask) => {
 
-            for (var i = 0; i < t.loadedMeshes.length; i++) {
-                var m = t.loadedMeshes[i];
+            subMeshes = t.loadedMeshes;
+            t.loadedMeshes.every((m) => {
                 m.scaling.x += 20;
                 m.scaling.y += 20;
                 m.scaling.z += 20;
@@ -155,13 +123,14 @@ window.addEventListener("DOMContentLoaded", () => {
                 //m.renderingGroupId = 1;
                 water.addToRenderList(m);
                 m.material = material;
-            }
+                return true;
+            });
 
         };
+
         sub2.onSuccess = (t: BABYLON.MeshAssetTask) => {
             var home = new BABYLON.Vector3(0, -5, 0);
-            for (var i = 0; i < t.loadedMeshes.length; i++) {
-                var m = t.loadedMeshes[i];
+            t.loadedMeshes.every((m) => {
                 m.scaling.x += 20;
                 m.scaling.y += 20;
                 m.scaling.z += 20;
@@ -170,10 +139,23 @@ window.addEventListener("DOMContentLoaded", () => {
                 //m.renderingGroupId = 1;
                 water.addToRenderList(m);
                 m.material = material;
-            }
-
+                return true;
+            });
         };
 
+
+        var moveCamera = () => {
+            var position = new BABYLON.Animation("camPos", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+            var lockedTarget = new BABYLON.Animation("camView", "lockedTarget", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+            camLocation = camLocation === 0 ? 1 : 0;
+            var keys1 = [{ frame: 0, value: camera.position }, { frame: 20, value: camLocations[camLocation] }];
+            var keys2 = [{ frame: 0, value: camera.lockedTarget }, { frame: 20, value: camViews[camLocation] }];
+            position.setKeys(keys1);
+            lockedTarget.setKeys(keys2);
+            camera.animations.push(position);
+            camera.animations.push(lockedTarget);
+            scene.beginAnimation(camera, 0, 50, false, 1);
+        }
 
         /*
          * before render, actions occur here
@@ -181,44 +163,81 @@ window.addEventListener("DOMContentLoaded", () => {
 
         scene.registerBeforeRender(() => {
 
-            if (moveCamera) {
-                moveCamera = false;
-                var position = new BABYLON.Animation("camPos", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                var lockedTarget = new BABYLON.Animation("camView", "lockedTarget", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                camLocation = camLocation === 0 ? 1 : 0;
-                var keys1 = [{ frame: 0, value: camera.position }, { frame: 50, value: camLocations[camLocation] }];
-                var keys2 = [{ frame: 0, value: camera.lockedTarget }, { frame: 50, value: camViews[camLocation] }];
-                position.setKeys(keys1);
-                lockedTarget.setKeys(keys2);
-                camera.animations.push(position);
-                camera.animations.push(lockedTarget);
-                scene.beginAnimation(camera, 0, 50, false, 1);
-            }
-
             if (fire) {
                 //fire a torpedo
                 fire = false;
+                (<HTMLButtonElement>document.getElementById("fire")).disabled = true;
+
                 var angle = parseFloat((<HTMLInputElement>document.getElementById("angle")).value);
                 var distance = parseFloat((<HTMLInputElement>document.getElementById("force")).value);
+
+                moveCamera();
 
                 var adj = Math.cos(toRadians((360-angle)+180)) * distance;
                 var opp = Math.sin(toRadians((360-angle)+180)) * distance;
 
                 var fireTo = new BABYLON.Vector3(opp, -3, -adj);
 
+                var hit = Math.pow(subOffset.x - fireTo.x, 2) < 4 && Math.pow(subOffset.z - fireTo.z, 2) < 4;
+
                 var frames = 60 * (distance / 50);
 
                 var torpedo = BABYLON.Mesh.CreateSphere("sphere" + new Date().toISOString(), 16, 4, scene);
+                torpedo.material = material;
+
                 var fireAnimation = new BABYLON.Animation("fireAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, false);
                 var fireAnimationKeys = [{ frame: 0, value: <BABYLON.Vector3>{ x: 0, y: 0, z: 0 } }, { frame: frames, value: fireTo }];
 
                 water.addToRenderList(torpedo);
                 fireAnimation.setKeys(fireAnimationKeys);
-                fireAnimation.addEvent(new BABYLON.AnimationEvent(frames, () => { torpedo = null; }, true));
+                //fireAnimation.addEvent(new BABYLON.AnimationEvent(frames, () => { torpedo = null; }, true));
                 torpedo.animations.push(fireAnimation);
 
                 torpedo.position = <BABYLON.Vector3>{ x: 0, y: 0, z: 0 };
-                scene.beginAnimation(torpedo, 0, frames, false, 1);
+                scene.beginAnimation(torpedo, 0, frames, false, 1, () => {
+                    scene.removeMesh(torpedo);
+                    var explosion = BABYLON.Mesh.CreateSphere("explosion" + new Date().toISOString(), 16, 0.1, scene);
+                    explosionMaterial.alpha = 1;
+                    explosion.material = explosionMaterial;
+                    explosion.position = new BABYLON.Vector3(fireTo.x, fireTo.y + 4, fireTo.z);
+
+                    water.addToRenderList(explosion);
+                    var explosionAnimationSize = new BABYLON.Animation("explosionAnimation", "scaling", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, false);
+                    var explosionAnimationOpacity = new BABYLON.Animation("explosionOpactiyAnimation", "material.alpha", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, false);
+
+                    var explosionAnimationKeys = [{ frame: 0, value: <BABYLON.Vector3>{ x: 1, y: 1, z: 1 } }, { frame: 40, value: <BABYLON.Vector3>{ x: 400, y: 600, z: 400 }}];
+
+                    var explosionAnimationOpacityKeys = [{ frame: 0, value: 1 }, { frame: 25, value: 1 }, { frame: 40, value: 0.2 }];
+
+                    explosionAnimationSize.setKeys(explosionAnimationKeys);
+                    explosionAnimationOpacity.setKeys(explosionAnimationOpacityKeys);
+
+                    explosion.animations.push(explosionAnimationSize);
+                    explosion.animations.push(explosionAnimationOpacity);
+
+                    scene.beginAnimation(explosion, 0, 40, false, 1, () => { scene.removeMesh(explosion);
+                        moveCamera();
+                        (<HTMLButtonElement>document.getElementById("fire")).disabled = false;
+                        if (hit) {
+                            document.getElementById("message").innerHTML = "Direct hit!";
+                            subMeshes.every((m, i) => {
+
+                                var sinkAni = new BABYLON.Animation("sinkani" + i, "position.y", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, false);
+                                var sinkAniKeys = [{ frame: 0, value: subOffset.y }, { frame: 120, value: -40 }];
+
+                                sinkAni.setKeys(sinkAniKeys);
+                                m.animations.push(sinkAni);
+                                scene.beginAnimation(m, 0, 120, false, 1, () => { scene.removeMesh(m); });
+
+                                return true;
+                            });
+                        } else {
+                            document.getElementById("message").innerHTML = "Close!";
+                        }
+                        window.setTimeout(() => { document.getElementById("message").innerHTML = ""; }, 1000);
+                    });
+                });
+                
             }
 
             
@@ -253,10 +272,10 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("fire").addEventListener("click", e => {
         fire = true;
     });
-
-    document.getElementById("moveCamera").addEventListener("click", e => {
-        moveCamera = true;
-    });
+//
+//    document.getElementById("moveCamera").addEventListener("click", e => {
+//        moveCamera = true;
+//    });
 
 
 });

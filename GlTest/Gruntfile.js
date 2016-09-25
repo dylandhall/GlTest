@@ -16,14 +16,23 @@ module.exports = function(grunt) {
         banner: "<%= banner %>",
         stripBanners: true
       },
-      dist: {
+      subs: {
           src: [
               "Babylon.js-master/dist/babylon.2.4.js",
               "Babylon.js-master/loaders/OBJ/babylon.objFileLoader.js",
               "node_modules/cannon/build/cannon.js",
               "Babylon.js-master/materialsLibrary/dist/babylon.waterMaterial.min.js",
               "app/scene.js"],
-        dest: "dist/<%= pkg.name %>.js"
+        dest: "dist/subs.js"
+      },
+      stats: {
+          src: [
+              "Babylon.js-master/dist/babylon.2.4.js",
+              "Babylon.js-master/loaders/OBJ/babylon.objFileLoader.js",
+              "node_modules/cannon/build/cannon.js",
+              "Babylon.js-master/materialsLibrary/dist/babylon.waterMaterial.min.js",
+              "app/stats.js"],
+          dest: "dist/stats.js"
       }
     },
     uglify: {
@@ -84,7 +93,7 @@ module.exports = function(grunt) {
     },
     copy: {
       main: {
-              src: ["index.html","Web.config","assets/**"],
+              src: ["*.html","Web.config","assets/**"],
               expand: true,
               cwd: "",
               dest: "dist/"

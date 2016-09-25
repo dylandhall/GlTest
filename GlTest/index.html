@@ -3,7 +3,7 @@
 <head>
     <title>shoot a box</title>
     <meta charset="utf-8"/>
-    <script type="text/javascript" src="gltest.js"></script>
+    <script type="text/javascript" src="subs.js"></script>
     <style>
     html, body {
         overflow: hidden;
@@ -14,9 +14,9 @@
     }
     .renderContainer {
         margin: 20px;
-        padding: 40px;
-        border: 4px gray solid;
-        background: antiquewhite;
+        padding: 4px;
+        border: 8px grey solid;
+        background: powderblue;
         display: inline-block;
     }
 
@@ -36,18 +36,18 @@
         float: left;
         margin: 10px;
     }
-    p{ font-family: sans-serif;}
+    p{ font-family: sans-serif;padding: 10px;}
 </style>
 </head>
 <body>
 
 <div class="renderContainer">
     <canvas id="renderCanvas"></canvas>
-    <p>Submarine is 120 meters out, and 40 meters starboard.<br/>
+    <p>Submarine is <span id="metersOut"></span> meters out, and <span id="metersStarboard"></span> meters starboard.<br/>
         What angle do you have to fire at and how far should the torpedo go before detonating?
     </p>
-    <label for="angle">angle:</label> <input id="angle" type="number" value="0"/> <label for="force">force:</label> <input type="number" id="force" value="200"/>&nbsp;<button id="fire">fire</button><br/>
-    <button id="moveCamera">Move the camera</button>
+    <p style="text-align: center"><label for="angle">angle:</label> <input id="angle" type="number" value="0" /> <label for="force">force:</label> <input type="number" id="force" value="200" />&nbsp;<button id="fire">fire</button> <br /><span id="message" style="font-weight: bold; font-size: large;">&nbsp;</span></p>
+    
 </div><br/>
 
 </body>
