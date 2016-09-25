@@ -107,12 +107,6 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         
         createPegs(<BABYLON.Vector3>{ x: -15.22, y: 5, z: 20 }, 10, 5);
-        
-
-//        pegs.every((x, i) => {
-//            x.physicsImpostor = new BABYLON.PhysicsImpostor(x, BABYLON.PhysicsImpostor.CylinderImpostor, pegPhysicsOptions, scene);
-//            return true;
-//        });
 
         //transparent material
         var trans = new BABYLON.StandardMaterial("trans", scene);
@@ -178,6 +172,10 @@ window.addEventListener("DOMContentLoaded", () => {
         bounding2.physicsImpostor = new BABYLON.PhysicsImpostor(bounding2, BABYLON.PhysicsImpostor.BoxImpostor, pegPhysicsOptions, scene);
         bounding3.physicsImpostor = new BABYLON.PhysicsImpostor(bounding3, BABYLON.PhysicsImpostor.BoxImpostor, pegPhysicsOptions, scene);
 
+        var cyl = BABYLON.Mesh.CreateCylinder("tube", 20, 3, 3, 16, 1, scene);
+        cyl.material = material;
+        cyl.position = new BABYLON.Vector3(0, 35, 20);
+        cyl.renderingGroupId = 1;
 
         scene.registerBeforeRender(() => {
 //            if (!fired) { party();
