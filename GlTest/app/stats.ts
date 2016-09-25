@@ -9,8 +9,8 @@ class ActiveSphere {
 
 var fired = false;
 var toRadians = angle => angle * (Math.PI / 180);
-var spherePhysicsOptions = { mass: 1, restitution: 0.9, friction: 0.05 };
-var pegPhysicsOptions = { mass: 0, restitution: 0.9, friction: 0.05 };
+var spherePhysicsOptions = { mass: 1, restitution: 0.8, friction: 0.2 };
+var pegPhysicsOptions = { mass: 0, restitution: 0.8, friction: 0.05 };
 
 var netLocation = new BABYLON.Vector3(0, 15, 70);
 var camLocations = [new BABYLON.Vector3(10, 20, -40), new BABYLON.Vector3(30, 30, -40)];
@@ -106,7 +106,7 @@ window.addEventListener("DOMContentLoaded", () => {
             }
         }
         
-        createPegs(<BABYLON.Vector3>{ x: -15.25, y: 5, z: 20 }, 10, 5);
+        createPegs(<BABYLON.Vector3>{ x: -15.22, y: 5, z: 20 }, 10, 5);
         
 
 //        pegs.every((x, i) => {
